@@ -46,9 +46,9 @@ data_storage_agent = autogen.AssistantAgent(
 )
 
 # Define the workflow function to be executed in the Streamlit app
-def process_workflow(vehicle_details, customer_details):
+def process_workflow(vehicle_details, customer_details, service_history):
     # 1. Client Intake & Initial Assessment
-    intake_message = f"Please collect details about the vehicle and client, including the car's specifications, service history, and customer's details. Vehicle: {vehicle_details}, Customer: {customer_details}"
+    intake_message = f"Please collect details about the vehicle and client, including the car's specifications, service history, and customer's details. Vehicle: {vehicle_details}, Customer: {customer_details}, Service History: {service_history}"
     intake_response = client_intake_agent.generate_reply(messages=[{"content": intake_message, "role": "user"}])
     st.write(f"**Client Intake Response:** {intake_response['content']}")
 
@@ -78,15 +78,88 @@ def process_workflow(vehicle_details, customer_details):
 def run_app():
     st.title("Vehicle Service Workflow")
 
-    # Collect vehicle details and customer details from the user
-    vehicle_details = st.text_input("Enter vehicle details (e.g., make, model, year)", "Toyota Camry 2020")
-    customer_details = st.text_input("Enter customer details (e.g., name, contact info)", "John Doe, 555-1234")
+    # Collect vehicle details
+    st.header("Vehicle Details")
+    vehicle_make = st.text_input("Enter vehicle make", "Honda")
+    vehicle_model = st.text_input("Enter vehicle model", "CRV")
+    vehicle_year = st.text_input("Enter vehicle year", "2022")
+    vehicle_vin = st.text_input("Enter Vehicle Identification Number (VIN)", "")
+    vehicle_color = st.text_input("Enter vehicle color", "")
+    vehicle_mileage = st.text_input("Enter vehicle mileage", "")
+    vehicle_engine = st.text_input("Enter engine type (e.g., 1.5L Turbo)", "")
+    vehicle_transmission = st.text_input("Enter transmission type (e.g., CVT)", "")
+    vehicle_fuel_type = st.text_input("Enter fuel type (e.g., Gasoline)", "")
+    vehicle_seating_capacity = st.text_input("Enter seating capacity", "5")
+    vehicle_doors = st.text_input("Enter number of doors", "5")
+    vehicle_condition = st.text_input("Enter vehicle condition (e.g., Excellent, Good)", "")
+
+    # Collect service history details
+    st.header("Service History")
+    service_last_date = st.text_input("Enter last service date", "")
+    service_next_due = st.text_input("Enter next service due", "")
+    service_mileage = st.text_input("Enter service mileage", "")
+    service_type = st.text_input("Enter service type (e.g., Oil Change, Tire Rotation)", "")
+    service_details = st.text_area("Enter additional service details", "")
+
+    # Collect customer details
+    st.header("Customer Details")
+    customer_name = st.text_input("Enter customer name", "Elias")
+    customer_contact = st.text_input("Enter customer contact number", "873484")
+    customer_email = st.text_input("Enter customer email", "")
+    customer_address = st.text_input("Enter customer address", "")
+    customer_dob = st.text_input("Enter customer date of birth", "")
+    customer_license = st.text_input("Enter customer driver's license number", "")
+    customer_registration = st.text_input("Enter vehicle registration number", "")
+    customer_additional_info = st.text_area("Enter any additional customer information", "")
 
     # Button to start the workflow
     if st.button("Start Service Process"):
+        # Collect data
+        vehicle_details = {
+            "Make": vehicle_make,
+            "Model": vehicle_model,
+            "Year": vehicle_year,
+            "VIN": vehicle_vin,
+            "Color": vehicle_color,
+            "Mileage": vehicle_mileage,
+            "Engine": vehicle_engine,
+            "Transmission": vehicle_transmission,
+            "Fuel Type": vehicle_fuel_type,
+            "Seating Capacity": vehicle_seating_capacity,
+            "Doors": vehicle_doors,
+            "Condition": vehicle_condition
+        }
+
+        service_history = {
+            "Last Service Date": service_last_date,
+            "Next Service Due": service_next_due,
+            "Service Mileage": service_mileage,
+            "Service Type": service_type,
+            "Service Details": service_details
+        }
+
+        customer_details = {
+            "Name": customer_name,
+            "Contact": customer_contact,
+            "Email": customer_email,
+            "Address": customer_address,
+            "Date of Birth": customer_dob,
+            "License Number": customer_license,
+            "Registration Number": customer_registration,
+            "Additional Info": customer_additional_info
+        }
+
+        # Display collected information
+        st.subheader("Collected Vehicle Details")
+        st.write(vehicle_details)
+        st.subheader("Collected Service History")
+        st.write(service_history)
+        st.subheader("Collected Customer Details")
+        st.write(customer_details)
+
         # Call the workflow function and display results
         with st.spinner('Processing...'):
-            result = process_workflow(vehicle_details, customer_details)
+            result = process_workflow(vehicle_details, customer_details, service_history)
             st.write(f"**Final Workflow Result:** {result['content']}")
 
 # Run the Streamlit app
