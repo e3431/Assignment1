@@ -81,17 +81,17 @@ def run_app():
 
     # Collect vehicle details
     st.header("Vehicle Details")
-    vehicle_make = st.text_input("Enter vehicle make", "Honda")
-    vehicle_model = st.text_input("Enter vehicle model", "CRV")
-    vehicle_year = st.text_input("Enter vehicle year", "2022")
+    vehicle_make = st.text_input("Enter vehicle make", "")
+    vehicle_model = st.text_input("Enter vehicle model", "")
+    vehicle_year = st.text_input("Enter vehicle year", "")
     vehicle_vin = st.text_input("Enter Vehicle Identification Number (VIN)", "")
     vehicle_color = st.text_input("Enter vehicle color", "")
     vehicle_mileage = st.text_input("Enter vehicle mileage", "")
     vehicle_engine = st.text_input("Enter engine type (e.g., 1.5L Turbo)", "")
     vehicle_transmission = st.text_input("Enter transmission type (e.g., CVT)", "")
     vehicle_fuel_type = st.text_input("Enter fuel type (e.g., Gasoline)", "")
-    vehicle_seating_capacity = st.text_input("Enter seating capacity", "5")
-    vehicle_doors = st.text_input("Enter number of doors", "5")
+    vehicle_seating_capacity = st.text_input("Enter seating capacity", "")
+    vehicle_doors = st.text_input("Enter number of doors", "")
     vehicle_condition = st.text_input("Enter vehicle condition (e.g., Excellent, Good)", "")
 
     # Collect service history details
@@ -104,8 +104,8 @@ def run_app():
 
     # Collect customer details
     st.header("Customer Details")
-    customer_name = st.text_input("Enter customer name", "Elias")
-    customer_contact = st.text_input("Enter customer contact number", "873484")
+    customer_name = st.text_input("Enter customer name", "")
+    customer_contact = st.text_input("Enter customer contact number", "")
     customer_email = st.text_input("Enter customer email", "")
     customer_address = st.text_input("Enter customer address", "")
     customer_dob = st.text_input("Enter customer date of birth", "")
