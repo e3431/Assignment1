@@ -53,7 +53,8 @@ def process_workflow(vehicle_details, customer_details, service_history):
     st.write(f"**Client Intake Response:** {intake_response['content']}")
 
     # 2. Vehicle Scanning & Report Generation
-    scanning_message = "Scan the vehicle's system for issues and generate a detailed diagnostic report."
+    # Now passing vehicle details explicitly to the scanning agent
+    scanning_message = f"Scan the following vehicle details and generate a detailed diagnostic report: {vehicle_details}"
     scanning_response = vehicle_scanning_agent.generate_reply(messages=[{"content": scanning_message, "role": "user"}])
     st.write(f"**Vehicle Scanning Response:** {scanning_response['content']}")
 
