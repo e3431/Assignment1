@@ -92,7 +92,7 @@ def process_workflow(vehicle_details, customer_details, service_history):
 def run_app():
     st.title("Vehicle Service Workflow")
 
-    # Collect vehicle details
+    # Collect vehicle details (required fields)
     st.header("Vehicle Details")
     vehicle_make = st.text_input("Enter vehicle make", "")
     vehicle_model = st.text_input("Enter vehicle model", "")
@@ -107,15 +107,7 @@ def run_app():
     vehicle_doors = st.text_input("Enter number of doors", "")
     vehicle_condition = st.text_input("Enter vehicle condition (e.g., Excellent, Good)", "")
 
-    # Collect service history details
-    st.header("Service History")
-    service_last_date = st.text_input("Enter last service date", "")
-    service_next_due = st.text_input("Enter next service due", "")
-    service_mileage = st.text_input("Enter service mileage", "")
-    service_type = st.text_input("Enter service type (e.g., Oil Change, Tire Rotation)", "")
-    service_details = st.text_area("Enter additional service details", "")
-
-    # Collect customer details
+    # Collect customer details (required fields)
     st.header("Customer Details")
     customer_name = st.text_input("Enter customer name", "")
     customer_contact = st.text_input("Enter customer contact number", "")
@@ -126,55 +118,69 @@ def run_app():
     customer_registration = st.text_input("Enter vehicle registration number", "")
     customer_additional_info = st.text_area("Enter any additional customer information", "")
 
+    # Collect service history details (optional)
+    st.header("Service History")
+    service_last_date = st.text_input("Enter last service date", "")
+    service_next_due = st.text_input("Enter next service due", "")
+    service_mileage = st.text_input("Enter service mileage", "")
+    service_type = st.text_input("Enter service type (e.g., Oil Change, Tire Rotation)", "")
+    service_details = st.text_area("Enter additional service details", "")
+
     # Button to start the workflow
     if st.button("Start Service Process"):
-        # Collect data
-        vehicle_details = {
-            "Make": vehicle_make,
-            "Model": vehicle_model,
-            "Year": vehicle_year,
-            "VIN": vehicle_vin,
-            "Color": vehicle_color,
-            "Mileage": vehicle_mileage,
-            "Engine": vehicle_engine,
-            "Transmission": vehicle_transmission,
-            "Fuel Type": vehicle_fuel_type,
-            "Seating Capacity": vehicle_seating_capacity,
-            "Doors": vehicle_doors,
-            "Condition": vehicle_condition
-        }
+        # Check if required fields are filled
+        if not all([vehicle_make, vehicle_model, vehicle_year, vehicle_vin, vehicle_color, vehicle_mileage, 
+                    customer_name, customer_contact, customer_email, customer_address]):
+            st.error("Please fill in all the required fields for both vehicle and customer info.")
+        else:
+            # Collect data
+            vehicle_details = {
+                "Make": vehicle_make,
+                "Model": vehicle_model,
+                "Year": vehicle_year,
+                "VIN": vehicle_vin,
+                "Color": vehicle_color,
+                "Mileage": vehicle_mileage,
+                "Engine": vehicle_engine,
+                "Transmission": vehicle_transmission,
+                "Fuel Type": vehicle_fuel_type,
+                "Seating Capacity": vehicle_seating_capacity,
+                "Doors": vehicle_doors,
+                "Condition": vehicle_condition
+            }
 
-        service_history = {
-            "Last Service Date": service_last_date,
-            "Next Service Due": service_next_due,
-            "Service Mileage": service_mileage,
-            "Service Type": service_type,
-            "Service Details": service_details
-        }
+            service_history = {
+                "Last Service Date": service_last_date,
+                "Next Service Due": service_next_due,
+                "Service Mileage": service_mileage,
+                "Service Type": service_type,
+                "Service Details": service_details
+            }
 
-        customer_details = {
-            "Name": customer_name,
-            "Contact": customer_contact,
-            "Email": customer_email,
-            "Address": customer_address,
-            "Date of Birth": customer_dob,
-            "License Number": customer_license,
-            "Registration Number": customer_registration,
-            "Additional Info": customer_additional_info
-        }
+            customer_details = {
+                "Name": customer_name,
+                "Contact": customer_contact,
+                "Email": customer_email,
+                "Address": customer_address,
+                "Date of Birth": customer_dob,
+                "License Number": customer_license,
+                "Registration Number": customer_registration,
+                "Additional Info": customer_additional_info
+            }
 
-        # Display collected information
-        st.subheader("Collected Vehicle Details")
-        st.write(vehicle_details)
-        st.subheader("Collected Service History")
-        st.write(service_history)
-        st.subheader("Collected Customer Details")
-        st.write(customer_details)
+            # Display collected information
+            st.subheader("Collected Vehicle Details")
+            st.write(vehicle_details)
+            st.subheader("Collected Service History")
+            st.write(service_history)
+            st.subheader("Collected Customer Details")
+            st.write(customer_details)
 
-        # Call the workflow function and display results
-        with st.spinner('Processing...'):
-            result = process_workflow(vehicle_details, customer_details, service_history)
-            st.write(f"**Final Workflow Result:** {result['content']}")
+            # Call the workflow function and display results
+            with st.spinner('Processing...'):
+                result = process_workflow(vehicle_details, customer_details, service_history)
+                st.write(f"**Final Workflow Result:** {result['content']}")
+
 
 # Run the Streamlit app
 if __name__ == "__main__":
