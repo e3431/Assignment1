@@ -70,19 +70,19 @@ def process_workflow(vehicle_details, customer_details, service_history):
 
    
     # 5. Data Storage & Initialization for Next Check-Up
-        storage_message = f"""
-        You are responsible for storing vehicle service history in a secure cloud system and ensuring that all data is backed up and accessible for future reference. 
-        Additionally, calculate the date and mileage for the next check-up.
+    storage_message = f"""
+    You are responsible for storing vehicle service history in a secure cloud system and ensuring that all data is backed up and accessible for future reference. 
+    Additionally, calculate the date and mileage for the next check-up.
         
-        Here are the details:
+    Here are the details:
         
-        Customer Info: {customer_details}
-        Vehicle Info: {vehicle_details}
-        Service History: {service_history}
-        Quality Control Report: {quality_control_response['content']}
-        """
-        storage_response = data_storage_agent.generate_reply(messages=[{"content": storage_message, "role": "user"}])
-        st.write(f"**Data Storage Response:** {storage_response['content']}")
+    Customer Info: {customer_details}
+    Vehicle Info: {vehicle_details}
+    Service History: {service_history}
+    Quality Control Report: {quality_control_response['content']}
+    """
+    storage_response = data_storage_agent.generate_reply(messages=[{"content": storage_message, "role": "user"}])
+    st.write(f"**Data Storage Response:** {storage_response['content']}")
 
 
 
