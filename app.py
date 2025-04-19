@@ -181,6 +181,11 @@ def run_app():
                 result = process_workflow(vehicle_details, customer_details, service_history)
                 st.write(f"**Final Workflow Result:** {result['content']}")
 
+# Run the Streamlit app
+if __name__ == "__main__":
+    run_app()
+
+
 
 # Run the Streamlit app
 if __name__ == "__main__":
