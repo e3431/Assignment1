@@ -1,4 +1,6 @@
 import streamlit as st
+import re
+from datetime import datetime
 import autogen
 
 # Define the LLM configuration
@@ -10,40 +12,95 @@ llm_config = {
     "temperature": 0
 }
 
-# Client Intake & Initial Assessment Agent
+# Initialize agents
 client_intake_agent = autogen.AssistantAgent(
     name="Client Intake Agent",
     system_message="You are an agent responsible for gathering detailed information from the client about the vehicle, including the car's specifications and the customer's details.",
     llm_config=llm_config,  # Using the provided llm_config
 )
 
-# Vehicle Scanning & Report Generation Agent
 vehicle_scanning_agent = autogen.AssistantAgent(
     name="Vehicle Scanning Agent",
     system_message="You are responsible for scanning the vehicle using diagnostic devices, collecting data, and generating a comprehensive report about the vehicle's condition.",
     llm_config=llm_config,  # Using the provided llm_config
 )
 
-# Mechanics Analysis & Decision Making Agent
 mechanics_analysis_agent = autogen.AssistantAgent(
     name="Mechanics Analysis Agent",
     system_message="You are an agent responsible for reviewing the diagnostic report, assessing the vehicle's condition, and making decisions on necessary repairs or part replacements.",
     llm_config=llm_config,  # Using the provided llm_config
 )
 
-# Quality Control Technician Agent
 quality_control_agent = autogen.AssistantAgent(
     name="Quality Control Technician",
     system_message="You are responsible for inspecting the vehicle after repairs to ensure that all systems are functioning correctly and verifying the repairs.",
     llm_config=llm_config,  # Using the provided llm_config
 )
 
-# Data Storage & Initialization for Next Check-Up Agent
 data_storage_agent = autogen.AssistantAgent(
     name="Data Storage Agent",
     system_message="You are responsible for storing vehicle service history in a secure cloud system and ensuring that all data is backed up and accessible for future reference. Additionally, you calculate the date and mileage for the next check-up.",
     llm_config=llm_config,  # Using the provided llm_config
 )
+
+# Function to validate each field
+def validate_input(vehicle_details, customer_details, service_history):
+    # Validate Vehicle Details
+    if not all([vehicle_details["Make"], vehicle_details["Model"], vehicle_details["VIN"], vehicle_details["Color"]]):
+        st.error("Please fill in all vehicle details (Make, Model, VIN, Color).")
+        return False
+
+    if not vehicle_details["Year"].isdigit() or len(vehicle_details["Year"]) != 4:
+        st.error("Year must be a valid 4-digit number.")
+        return False
+    
+    if not vehicle_details["Mileage"].isdigit() or int(vehicle_details["Mileage"]) <= 0:
+        st.error("Mileage must be a positive number.")
+        return False
+    
+    if not vehicle_details["Seating Capacity"].isdigit() or int(vehicle_details["Seating Capacity"]) <= 0:
+        st.error("Seating capacity must be a positive number.")
+        return False
+
+    # Validate Customer Details
+    if not all([customer_details["Name"], customer_details["Contact"], customer_details["Email"], customer_details["Address"]]):
+        st.error("Please fill in all customer details (Name, Contact, Email, Address).")
+        return False
+
+    if not re.match(r"^[\d]{10}$", customer_details["Contact"]):
+        st.error("Contact number must be a 10-digit number.")
+        return False
+
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", customer_details["Email"]):
+        st.error("Please enter a valid email address.")
+        return False
+
+    # Validate Service History
+    if not service_history["Last Service Date"] or not service_history["Next Service Due"]:
+        st.error("Please enter valid service dates (Last Service Date and Next Service Due).")
+        return False
+    
+    try:
+        datetime.strptime(service_history["Last Service Date"], "%Y-%m-%d")
+    except ValueError:
+        st.error("Last Service Date must be in the format YYYY-MM-DD.")
+        return False
+    
+    try:
+        datetime.strptime(service_history["Next Service Due"], "%Y-%m-%d")
+    except ValueError:
+        st.error("Next Service Due must be in the format YYYY-MM-DD.")
+        return False
+    
+    if not service_history["Service Mileage"].isdigit() or int(service_history["Service Mileage"]) <= 0:
+        st.error("Service mileage must be a positive number.")
+        return False
+
+    if not service_history["Service Type"]:
+        st.error("Service Type cannot be empty.")
+        return False
+
+    return True
 
 # Define the workflow function to be executed in the Streamlit app
 def process_workflow(vehicle_details, customer_details, service_history):
@@ -53,7 +110,6 @@ def process_workflow(vehicle_details, customer_details, service_history):
     st.write(f"**Client Intake Response:** {intake_response['content']}")
 
     # 2. Vehicle Scanning & Report Generation
-    # Now passing vehicle details explicitly to the scanning agent
     scanning_message = f"Scan the following vehicle details and generate a detailed diagnostic report: {vehicle_details}"
     scanning_response = vehicle_scanning_agent.generate_reply(messages=[{"content": scanning_message, "role": "user"}])
     st.write(f"**Vehicle Scanning Response:** {scanning_response['content']}")
@@ -68,7 +124,6 @@ def process_workflow(vehicle_details, customer_details, service_history):
     quality_control_response = quality_control_agent.generate_reply(messages=[{"content": quality_control_message, "role": "user"}])
     st.write(f"**Quality Control Response:** {quality_control_response['content']}")
 
-   
     # 5. Data Storage & Initialization for Next Check-Up
     storage_message = f"""
     You are responsible for storing vehicle service history in a secure cloud system and ensuring that all data is backed up and accessible for future reference. 
@@ -83,8 +138,6 @@ def process_workflow(vehicle_details, customer_details, service_history):
     """
     storage_response = data_storage_agent.generate_reply(messages=[{"content": storage_message, "role": "user"}])
     st.write(f"**Data Storage Response:** {storage_response['content']}")
-
-
 
     return storage_response
 
@@ -120,54 +173,51 @@ def run_app():
 
     # Collect service history details (optional)
     st.header("Service History")
-    service_last_date = st.text_input("Enter last service date", "")
-    service_next_due = st.text_input("Enter next service due", "")
+    service_last_date = st.text_input("Enter last service date (YYYY-MM-DD)", "")
+    service_next_due = st.text_input("Enter next service due (YYYY-MM-DD)", "")
     service_mileage = st.text_input("Enter service mileage", "")
     service_type = st.text_input("Enter service type (e.g., Oil Change, Tire Rotation)", "")
     service_details = st.text_area("Enter additional service details", "")
 
     # Button to start the workflow
     if st.button("Start Service Process"):
-        # Check if required fields are filled
-        if not all([vehicle_make, vehicle_model, vehicle_year, vehicle_vin, vehicle_color, vehicle_mileage, 
-                    customer_name, customer_contact, customer_email, customer_address]):
-            st.error("Please fill in all the required fields for both vehicle and customer info.")
-        else:
-            # Collect data
-            vehicle_details = {
-                "Make": vehicle_make,
-                "Model": vehicle_model,
-                "Year": vehicle_year,
-                "VIN": vehicle_vin,
-                "Color": vehicle_color,
-                "Mileage": vehicle_mileage,
-                "Engine": vehicle_engine,
-                "Transmission": vehicle_transmission,
-                "Fuel Type": vehicle_fuel_type,
-                "Seating Capacity": vehicle_seating_capacity,
-                "Doors": vehicle_doors,
-                "Condition": vehicle_condition
-            }
+        # Collect data
+        vehicle_details = {
+            "Make": vehicle_make,
+            "Model": vehicle_model,
+            "Year": vehicle_year,
+            "VIN": vehicle_vin,
+            "Color": vehicle_color,
+            "Mileage": vehicle_mileage,
+            "Engine": vehicle_engine,
+            "Transmission": vehicle_transmission,
+            "Fuel Type": vehicle_fuel_type,
+            "Seating Capacity": vehicle_seating_capacity,
+            "Doors": vehicle_doors,
+            "Condition": vehicle_condition
+        }
 
-            service_history = {
-                "Last Service Date": service_last_date,
-                "Next Service Due": service_next_due,
-                "Service Mileage": service_mileage,
-                "Service Type": service_type,
-                "Service Details": service_details
-            }
+        service_history = {
+            "Last Service Date": service_last_date,
+            "Next Service Due": service_next_due,
+            "Service Mileage": service_mileage,
+            "Service Type": service_type,
+            "Service Details": service_details
+        }
 
-            customer_details = {
-                "Name": customer_name,
-                "Contact": customer_contact,
-                "Email": customer_email,
-                "Address": customer_address,
-                "Date of Birth": customer_dob,
-                "License Number": customer_license,
-                "Registration Number": customer_registration,
-                "Additional Info": customer_additional_info
-            }
+        customer_details = {
+            "Name": customer_name,
+            "Contact": customer_contact,
+            "Email": customer_email,
+            "Address": customer_address,
+            "Date of Birth": customer_dob,
+            "License Number": customer_license,
+            "Registration Number": customer_registration,
+            "Additional Info": customer_additional_info
+        }
 
+        # Validate input
+        if validate_input(vehicle_details, customer_details, service_history):
             # Display collected information
             st.subheader("Collected Vehicle Details")
             st.write(vehicle_details)
